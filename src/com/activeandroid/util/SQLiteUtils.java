@@ -24,6 +24,7 @@ import com.activeandroid.Cache;
 import com.activeandroid.Model;
 import com.activeandroid.TableInfo;
 import com.activeandroid.annotation.Column;
+import com.activeandroid.annotation.Column.ConflictAction;
 import com.activeandroid.serializer.TypeSerializer;
 
 import java.lang.reflect.Constructor;
@@ -31,6 +32,8 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public final class SQLiteUtils {
 	//////////////////////////////////////////////////////////////////////////////////////
@@ -77,6 +80,14 @@ public final class SQLiteUtils {
 	};
 
 	//////////////////////////////////////////////////////////////////////////////////////
+	// PRIVATE MEMBERS
+	//////////////////////////////////////////////////////////////////////////////////////
+
+	private static HashMap<String, List<String>> sIndexGroupMap;
+	private static HashMap<String, List<String>> sUniqueGroupMap;
+	private static HashMap<String, ConflictAction> sOnUniqueConflictsMap;
+
+	//////////////////////////////////////////////////////////////////////////////////////
 	// PUBLIC METHODS
 	//////////////////////////////////////////////////////////////////////////////////////
 
@@ -108,6 +119,104 @@ public final class SQLiteUtils {
 
 	// Database creation
 
+	public static ArrayList<String> createUniqueDefinition(TableInfo tableInfo) {
+		final ArrayList<String> definitions = new ArrayList<String>();
+		sUniqueGroupMap = new HashMap<String, List<String>>();
+		sOnUniqueConflictsMap = new HashMap<String, ConflictAction>();
+
+		for (Field field : tableInfo.getFields()) {
+			createUniqueColumnDefinition(tableInfo, field);
+		}
+
+		if (sUniqueGroupMap.isEmpty()) {
+			return definitions;
+		}
+
+		Set<String> keySet = sUniqueGroupMap.keySet();
+		for (String key : keySet) {
+			List<String> group = sUniqueGroupMap.get(key);
+			ConflictAction conflictAction = sOnUniqueConflictsMap.get(key);
+
+			definitions.add(String.format("UNIQUE (%s) ON CONFLICT %s",
+					TextUtils.join(", ", group), conflictAction.toString()));
+		}
+
+		return definitions;
+	}
+
+	public static void createUniqueColumnDefinition(TableInfo tableInfo, Field field) {
+		final String name = tableInfo.getColumnName(field);
+		final Column column = field.getAnnotation(Column.class);
+
+		String[] groups = column.uniqueGroups();
+		ConflictAction[] conflictActions = column.onUniqueConflicts();
+		if (groups.length != conflictActions.length)
+			return;
+
+		for (int i = 0; i < groups.length; i++) {
+			String group = groups[i];
+			ConflictAction conflictAction = conflictActions[i];
+
+			if (group.isEmpty())
+				continue;
+
+			List<String> list = sUniqueGroupMap.get(group);
+			if (list == null) {
+				list = new ArrayList<String>();
+			}
+			list.add(name);
+
+			sUniqueGroupMap.put(group, list);
+			sOnUniqueConflictsMap.put(group, conflictAction);
+		}
+	}
+
+	public static String[] createIndexDefinition(TableInfo tableInfo) {
+		final ArrayList<String> definitions = new ArrayList<String>();
+		sIndexGroupMap = new HashMap<String, List<String>>();
+
+		for (Field field : tableInfo.getFields()) {
+			createIndexColumnDefinition(tableInfo, field);
+		}
+
+		if (sIndexGroupMap.isEmpty()) {
+			return new String[0];
+		}
+
+		for (Map.Entry<String, List<String>> entry : sIndexGroupMap.entrySet()) {
+			definitions.add(String.format("CREATE INDEX IF NOT EXISTS %s on %s(%s);",
+					"index_" + tableInfo.getTableName() + "_" + entry.getKey(),
+					tableInfo.getTableName(), TextUtils.join(", ", entry.getValue())));
+		}
+
+		return definitions.toArray(new String[definitions.size()]);
+	}
+
+	public static void createIndexColumnDefinition(TableInfo tableInfo, Field field) {
+		final String name = tableInfo.getColumnName(field);
+		final Column column = field.getAnnotation(Column.class);
+
+		if (column.index()) {
+			List<String> list = new ArrayList<String>();
+			list.add(name);
+			sIndexGroupMap.put(name, list);
+		}
+
+		String[] groups = column.indexGroups();
+		for (String group : groups) {
+			if (group.isEmpty())
+				continue;
+
+			List<String> list = sIndexGroupMap.get(group);
+			if (list == null) {
+				list = new ArrayList<String>();
+			}
+
+			list.add(name);
+			sIndexGroupMap.put(group, list);
+		}
+	}
+
 	public static String createTableDefinition(TableInfo tableInfo) {
 		final ArrayList<String> definitions = new ArrayList<String>();
 
@@ -117,6 +226,8 @@ public final class SQLiteUtils {
 				definitions.add(definition);
 			}
 		}
+
+		definitions.addAll(createUniqueDefinition(tableInfo));
 
 		return String.format("CREATE TABLE IF NOT EXISTS %s (%s);", tableInfo.getTableName(),
 				TextUtils.join(", ", definitions));
@@ -209,6 +320,16 @@ public final class SQLiteUtils {
 				while (cursor.moveToNext());
 			}
 
+		}
+		catch (NoSuchMethodException e) {
+			throw new RuntimeException(
+                "Your model " + type.getName() + " does not define a default " +
+                "constructor. The default constructor is required for " +
+                "now in ActiveAndroid models, as the process to " +
+                "populate the ORM model is : " +
+                "1. instantiate default model " +
+                "2. populate fields"
+            );
 		}
 		catch (Exception e) {
 			Log.e("Failed to process cursor.", e);
