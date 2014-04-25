@@ -33,10 +33,13 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.text.TextUtils;
 
+import com.activeandroid.util.IOUtils;
 import com.activeandroid.util.Log;
 import com.activeandroid.util.NaturalOrderComparator;
 import com.activeandroid.util.SQLiteUtils;
+import com.activeandroid.util.SqlParser;
 
 public final class DatabaseHelper extends SQLiteOpenHelper {
 	//////////////////////////////////////////////////////////////////////////////////////
@@ -52,6 +55,12 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
     private int mDatabaseVersion;
 
 	//////////////////////////////////////////////////////////////////////////////////////
+    // PRIVATE FIELDS
+    //////////////////////////////////////////////////////////////////////////////////////
+
+    private final String mSqlParser;
+
+	//////////////////////////////////////////////////////////////////////////////////////
 	// CONSTRUCTORS
 	//////////////////////////////////////////////////////////////////////////////////////
 
@@ -59,6 +68,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 		super(configuration.getContext(), configuration.getDatabaseName(), null, configuration.getDatabaseVersion());
 		copyAttachedDatabase(configuration.getContext(), configuration.getDatabaseName());
         mDatabaseVersion = configuration.getDatabaseVersion();
+		mSqlParser = configuration.getSqlParser();
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////////
@@ -239,26 +249,59 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 	}
 
 	private void executeSqlScript(SQLiteDatabase db, String file) {
+
+	    InputStream stream = null;
+
 		try {
-			final InputStream input = Cache.getContext().getAssets().open(MIGRATION_PATH + "/" + file);
-			final BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-			String line = null;
-            String insert = "";
+		    stream = Cache.getContext().getAssets().open(MIGRATION_PATH + "/" + file);
 
-			while ((line = reader.readLine()) != null) {
-                if(line.endsWith(";")){
-                    insert += line;
+		    if (Configuration.SQL_PARSER_DELIMITED.equalsIgnoreCase(mSqlParser)) {
+		        executeDelimitedSqlScript(db, stream);
 
+		    } else {
+		        executeLegacySqlScript(db, stream);
 
-                    db.execSQL(insert.replace(";", ""));
-                    insert = "";
-                }else{
-                    insert += line + "\n";
-                }
-			}
-		}
-		catch (IOException e) {
+		    }
+
+		} catch (IOException e) {
 			Log.e("Failed to execute " + file, e);
+
+		} finally {
+		    IOUtils.closeQuietly(stream);
+
 		}
+	}
+
+	private void executeDelimitedSqlScript(SQLiteDatabase db, InputStream stream) throws IOException {
+
+	    List<String> commands = SqlParser.parse(stream);
+
+	    for(String command : commands) {
+	        db.execSQL(command);
+	    }
+	}
+
+	private void executeLegacySqlScript(SQLiteDatabase db, InputStream stream) throws IOException {
+
+	    InputStreamReader reader = null;
+        BufferedReader buffer = null;
+
+        try {
+            reader = new InputStreamReader(stream);
+            buffer = new BufferedReader(reader);
+            String line = null;
+
+            while ((line = buffer.readLine()) != null) {
+                line = line.replace(";", "").trim();
+                if (!TextUtils.isEmpty(line)) {
+                    db.execSQL(line);
+                }
+            }
+
+        } finally {
+            IOUtils.closeQuietly(buffer);
+            IOUtils.closeQuietly(reader);
+
+        }
 	}
 }
