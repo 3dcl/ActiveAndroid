@@ -33,7 +33,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.text.TextUtils;
 
 import com.activeandroid.util.IOUtils;
 import com.activeandroid.util.Log;
@@ -163,10 +162,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 		db.beginTransaction();
 		try {
 			for (TableInfo tableInfo : Cache.getTableInfos()) {
-                if(!updateTable(db, tableInfo)){
-                    // try to create table
-				    db.execSQL(SQLiteUtils.createTableDefinition(tableInfo));
-                }
+                db.execSQL(SQLiteUtils.createTableDefinition(tableInfo));
 			}
 			db.setTransactionSuccessful();
 		}
@@ -174,43 +170,6 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 			db.endTransaction();
 		}
 	}
-
-    /**
-     * Tries to update database tables. If the table does not exist false is returned and
-     * a new table can be created. If the table already exists return true and check if there
-     * are any new columns are missing and alters the existing table accordingly.
-     * @param db
-     * @param tableInfo
-     * @return
-     */
-    private boolean updateTable(SQLiteDatabase db, TableInfo tableInfo) {
-        boolean result = false;
-        // load old table schema
-        Cursor c = db.rawQuery("PRAGMA table_info(" + tableInfo.getTableName() + ")", null);
-        List<String> currentTableColumnNames = new ArrayList<String>();
-        if (c.moveToFirst()) {
-            // if table already exists, load its current columns
-            do {
-                String name = c.getString(1);
-            } while (c.moveToNext());
-
-            for (Field field : tableInfo.getFields()) {
-                String columnName = tableInfo.getColumnName(field);
-
-                // check if new column is present in old schema
-                if(!currentTableColumnNames.contains(columnName)){
-                    String definition = SQLiteUtils.createColumnDefinition(tableInfo, field);
-                    String alterTable = String.format("ALTER TABLE %s ADD COLUMN %s;", tableInfo.getTableName(), definition);
-                    db.execSQL(alterTable);
-                }
-            }
-            // return true if table already exists
-            result = true;
-        }
-        c.close();
-
-        return result;
-    }
 
     private boolean executeMigrations(SQLiteDatabase db, int oldVersion, int newVersion) {
 		boolean migrationExecuted = false;
@@ -260,7 +219,6 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 
 		    } else {
 		        executeLegacySqlScript(db, stream);
-
 		    }
 
 		} catch (IOException e) {
@@ -290,18 +248,21 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
             reader = new InputStreamReader(stream);
             buffer = new BufferedReader(reader);
             String line = null;
+            String insert = "";
 
             while ((line = buffer.readLine()) != null) {
-                line = line.replace(";", "").trim();
-                if (!TextUtils.isEmpty(line)) {
-                    db.execSQL(line);
+                if(line.endsWith(";")){
+                    insert += line;
+                    db.execSQL(insert.replace(";", ""));
+                    insert = "";
+                }else{
+                    insert += line + "\n";
                 }
             }
 
         } finally {
             IOUtils.closeQuietly(buffer);
             IOUtils.closeQuietly(reader);
-
         }
 	}
 }
