@@ -20,6 +20,7 @@ import java.util.Collection;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Build;
 import android.support.v4.util.LruCache;
 
 import com.activeandroid.serializer.TypeSerializer;
@@ -72,7 +73,8 @@ public final class Cache {
 		// object size instead.
 		sEntities = new LruCache<String, Model>(configuration.getCacheSize());
 
-		openDatabase();
+		SQLiteDatabase db = openDatabase();
+
 
 		sIsInitialized = true;
 

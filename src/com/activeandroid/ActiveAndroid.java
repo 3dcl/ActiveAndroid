@@ -18,6 +18,7 @@ package com.activeandroid;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Build;
 
 import com.activeandroid.util.Log;
 
@@ -61,7 +62,11 @@ public final class ActiveAndroid {
 	}
 
 	public static void beginTransaction() {
-		Cache.openDatabase().beginTransaction();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            Cache.openDatabase().beginTransactionNonExclusive();
+        }else{
+            Cache.openDatabase().beginTransaction();
+        }
 	}
 
 	public static void endTransaction() {
