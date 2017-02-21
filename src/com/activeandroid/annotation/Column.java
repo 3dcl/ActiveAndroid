@@ -24,29 +24,29 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Column {
-	public enum ConflictAction {
+	enum ConflictAction {
 		ROLLBACK, ABORT, FAIL, IGNORE, REPLACE
 	}
 
-	public enum ForeignKeyAction {
+	enum ForeignKeyAction {
 		SET_NULL, SET_DEFAULT, CASCADE, RESTRICT, NO_ACTION
 	}
 
-	public String name() default "";
+	String name() default "";
 
-	public int length() default -1;
+	int length() default -1;
 
-	public boolean notNull() default false;
+	boolean notNull() default false;
 
-	public ConflictAction onNullConflict() default ConflictAction.FAIL;
+	ConflictAction onNullConflict() default ConflictAction.FAIL;
 
-	public ForeignKeyAction onDelete() default ForeignKeyAction.NO_ACTION;
+	ForeignKeyAction onDelete() default ForeignKeyAction.NO_ACTION;
 
-	public ForeignKeyAction onUpdate() default ForeignKeyAction.NO_ACTION;
+	ForeignKeyAction onUpdate() default ForeignKeyAction.NO_ACTION;
 
-	public boolean unique() default false;
+	boolean unique() default false;
 
-	public ConflictAction onUniqueConflict() default ConflictAction.FAIL;
+	ConflictAction onUniqueConflict() default ConflictAction.FAIL;
 
 	/*
 	 * If set uniqueGroups = {"group_name"}, we will create a table constraint with group.
@@ -67,9 +67,9 @@ public @interface Column {
 	 *
 	 * CREATE TABLE table_name (..., UNIQUE (member1, member2) ON CONFLICT FAIL, UNIQUE (member2, member3) ON CONFLICT IGNORE)
 	 */
-	public String[] uniqueGroups() default {};
+	String[] uniqueGroups() default {};
 
-	public ConflictAction[] onUniqueConflicts() default {};
+	ConflictAction[] onUniqueConflicts() default {};
 
 	/*
 	 * If set index = true, we will create a index with single column.
@@ -84,7 +84,7 @@ public @interface Column {
 	 *
 	 * Execute CREATE INDEX index_table_name_member on table_name(member)
 	 */
-	public boolean index() default false;
+	boolean index() default false;
 
 	/*
 	 * If set indexGroups = {"group_name"}, we will create a index with group.
@@ -106,5 +106,5 @@ public @interface Column {
 	 * Execute CREATE INDEX index_table_name_group1 on table_name(member1, member2)
 	 * Execute CREATE INDEX index_table_name_group2 on table_name(member2, member3)
 	 */
-	public String[] indexGroups() default {};
+	String[] indexGroups() default {};
 }

@@ -16,7 +16,7 @@ public final class UUIDSerializer extends TypeSerializer {
 			return null;
 		}
 
-		return ((UUID) data).toString();
+		return data.toString();
 	}
 
 	public UUID deserialize(Object data) {

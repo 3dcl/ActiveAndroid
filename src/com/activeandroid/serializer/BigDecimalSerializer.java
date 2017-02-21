@@ -16,7 +16,7 @@ public final class BigDecimalSerializer extends TypeSerializer {
 			return null;
 		}
 
-		return ((BigDecimal) data).toString();
+		return data.toString();
 	}
 
 	public BigDecimal deserialize(Object data) {

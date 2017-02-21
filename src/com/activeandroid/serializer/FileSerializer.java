@@ -33,7 +33,7 @@ public final class FileSerializer extends TypeSerializer {
 			return null;
 		}
 
-		return ((File) data).toString();
+		return data.toString();
 	}
 
 	public File deserialize(Object data) {

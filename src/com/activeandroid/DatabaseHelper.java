@@ -77,7 +77,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 	@Override
 	public void onOpen(SQLiteDatabase db) {
 		executePragmas(db);
-	};
+	}
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {

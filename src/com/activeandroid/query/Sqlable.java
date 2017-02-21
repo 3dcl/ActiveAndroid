@@ -17,5 +17,5 @@ package com.activeandroid.query;
  */
 
 public interface Sqlable {
-	public String toSql();
+	String toSql();
 }

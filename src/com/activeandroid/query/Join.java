@@ -22,7 +22,7 @@ import com.activeandroid.Cache;
 import com.activeandroid.Model;
 
 public final class Join implements Sqlable {
-	static enum JoinType {
+	enum JoinType {
 		LEFT, OUTER, INNER, CROSS
 	}
 
