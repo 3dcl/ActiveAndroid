@@ -336,7 +336,11 @@ public final class SQLiteUtils {
                  */
                 List<String> columnsOrdered = new ArrayList<String>(Arrays.asList(cursor.getColumnNames()));
 				do {
-					Model entity = Cache.getEntity(type, cursor.getLong(columnsOrdered.indexOf(idName)));
+					int idColumnIndex = columnsOrdered.indexOf(idName);
+					Model entity = null;
+					if(idColumnIndex != -1) {
+						entity = Cache.getEntity(type, cursor.getLong(idColumnIndex));
+					}
 					if (entity == null) {
 						entity = (T) entityConstructor.newInstance();
 					}
