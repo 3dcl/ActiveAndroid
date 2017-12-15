@@ -59,11 +59,11 @@ public abstract class Model {
 	// PUBLIC METHODS
 	//////////////////////////////////////////////////////////////////////////////////////
 
-	public final Long getId() {
+	public Long getId() {
 		return mId;
 	}
 
-	protected final void setId(Long id) {
+	protected void setId(Long id) {
 		this.mId = id;
 	}
 
@@ -156,7 +156,8 @@ public abstract class Model {
 		}
 
 		if (getId() == null) {
-			setId(db.insert(mTableInfo.getTableName(), null, values));
+			Long id = db.insert(mTableInfo.getTableName(), null, values);
+			setId(id);
 		}
 		else {
 			db.update(mTableInfo.getTableName(), values, idName+"=" + getId(), null);

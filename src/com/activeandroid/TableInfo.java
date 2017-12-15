@@ -106,9 +106,13 @@ public final class TableInfo {
 
 
     private Field getIdField(Class<?> type) {
-        if (type.equals(Model.class)) {
+        if (Model.class.isAssignableFrom(type)) {
             try {
-                return type.getDeclaredField("mId");
+                if(mIdName ==  Table.DEFAULT_ID_NAME){
+                    return Model.class.getDeclaredField("mId");
+                }else {
+                    return type.getDeclaredField(mIdName);
+                }
             }
             catch (NoSuchFieldException e) {
                 Log.e("Impossible!", e.toString());
