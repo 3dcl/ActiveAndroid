@@ -25,6 +25,7 @@ import com.activeandroid.Model;
 import com.activeandroid.TableInfo;
 import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Column.ConflictAction;
+import com.activeandroid.annotation.Table;
 import com.activeandroid.serializer.TypeSerializer;
 
 import java.lang.Long;
@@ -159,10 +160,14 @@ public final class SQLiteUtils {
 		final String name = tableInfo.getColumnName(field);
 		final Column column = field.getAnnotation(Column.class);
 
-        if (field.getName().equals("mId")) {
+        if (field.getName().equals("mID")) {
             return;
         }
 
+        if(column == null){
+			Log.w("No column definition for field " + field.getName());
+			return;
+		}
 		String[] groups = column.uniqueGroups();
 		ConflictAction[] conflictActions = column.onUniqueConflicts();
 		if (groups.length != conflictActions.length)
@@ -211,10 +216,14 @@ public final class SQLiteUtils {
 		final String name = tableInfo.getColumnName(field);
 		final Column column = field.getAnnotation(Column.class);
 
-        if (field.getName().equals("mId")) {
+        if (field.getName().equals(tableInfo.getIdName())) {
             return;
         }
 
+        if(column == null){
+        	Log.w("Column for field " + field.getName() + " not annotated");
+        	return;
+		}
 		if (column.index()) {
 			List<String> list = new ArrayList<String>();
 			list.add(name);
