@@ -1,6 +1,12 @@
 buildscript {
 	repositories {
 		mavenCentral()
+        maven {
+            url 'https://maven.google.com/'
+            name 'Google'
+        }
+
+        google()
 	}
     dependencies {
         classpath 'com.android.tools.build:gradle:3.1.2'
@@ -10,9 +16,13 @@ buildscript {
 
 
 repositories{
+	mavenCentral()
 	maven {
-		url "https://maven.google.com"
+		url 'https://maven.google.com/'
+		name 'Google'
 	}
+
+	google()
 }
 apply plugin: 'com.android.library'
 //apply plugin: 'java'
