@@ -45,14 +45,14 @@ public abstract class Model {
 	private Long mId = null;
 
 	private final TableInfo mTableInfo;
-	private final String idName;
+	private final String idDBColumnName;
 	//////////////////////////////////////////////////////////////////////////////////////
 	// CONSTRUCTORS
 	//////////////////////////////////////////////////////////////////////////////////////
 
 	public Model() {
 		mTableInfo = Cache.getTableInfo(getClass());
-		idName = mTableInfo.getIdName();
+		idDBColumnName = mTableInfo.getIdDBFieldName();
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////////
@@ -68,7 +68,7 @@ public abstract class Model {
 	}
 
 	public final void delete() {
-		Cache.openDatabase().delete(mTableInfo.getTableName(), idName+"=?", new String[] { getId().toString() });
+		Cache.openDatabase().delete(mTableInfo.getTableName(), idDBColumnName +"=?", new String[] { getId().toString() });
 		Cache.removeEntity(this);
 
 		Cache.getContext().getContentResolver()
@@ -160,7 +160,7 @@ public abstract class Model {
 			setId(id);
 		}
 		else {
-			db.update(mTableInfo.getTableName(), values, idName+"=" + getId(), null);
+			db.update(mTableInfo.getTableName(), values, idDBColumnName +"=" + getId(), null);
 		}
 
 		Cache.getContext().getContentResolver()
@@ -172,12 +172,12 @@ public abstract class Model {
 
 	public static void delete(Class<? extends Model> type, long id) {
 		TableInfo tableInfo = Cache.getTableInfo(type);
-		new Delete().from(type).where(tableInfo.getIdName()+"=?", id).execute();
+		new Delete().from(type).where(tableInfo.getIdDBFieldName()+"=?", id).execute();
 	}
 
 	public static <T extends Model> T load(Class<T> type, long id) {
 		TableInfo tableInfo = Cache.getTableInfo(type);
-		return (T) new Select().from(type).where(tableInfo.getIdName()+"=?", id).executeSingle();
+		return (T) new Select().from(type).where(tableInfo.getIdDBFieldName()+"=?", id).executeSingle();
 	}
 
 	// Model population
@@ -191,7 +191,7 @@ public abstract class Model {
 		for (Field field : mTableInfo.getFields()) {
 			final String fieldName = mTableInfo.getColumnName(field);
 			Class<?> fieldType = field.getType();
-			final int columnIndex = columnsOrdered.indexOf(fieldName);
+			final int columnIndex = TableInfo.getColumnIndex(columnsOrdered, fieldName);
 
 			if (columnIndex < 0) {
 				continue;
@@ -224,7 +224,7 @@ public abstract class Model {
 				}
 				else if (fieldType.equals(Long.class) || fieldType.equals(long.class)) {
 					value = cursor.getLong(columnIndex);
-					if(fieldName == mTableInfo.getIdName() ){
+					if(fieldName.compareToIgnoreCase(mTableInfo.getIdDBFieldName()) == 0 ){
 						setId((Long) value);
 					}
 				}
@@ -252,7 +252,7 @@ public abstract class Model {
 
 					Model entity = Cache.getEntity(entityType, entityId);
 					if (entity == null) {
-						entity = new Select().from(entityType).where(idName+"=?", entityId).executeSingle();
+						entity = new Select().from(entityType).where(idDBColumnName +"=?", entityId).executeSingle();
 					}
 
 					value = entity;

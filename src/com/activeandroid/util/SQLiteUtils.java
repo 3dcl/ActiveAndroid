@@ -25,7 +25,6 @@ import com.activeandroid.Model;
 import com.activeandroid.TableInfo;
 import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Column.ConflictAction;
-import com.activeandroid.annotation.Table;
 import com.activeandroid.serializer.TypeSerializer;
 
 import java.lang.Long;
@@ -216,7 +215,7 @@ public final class SQLiteUtils {
 		final String name = tableInfo.getColumnName(field);
 		final Column column = field.getAnnotation(Column.class);
 
-        if (field.getName().equals(tableInfo.getIdName())) {
+        if (field.getName().equals("mId")) {
             return;
         }
 
@@ -292,7 +291,7 @@ public final class SQLiteUtils {
 
 		if (!TextUtils.isEmpty(definition)) {
 
-			if (name.equals(tableInfo.getIdName())) {
+			if (name.equals(tableInfo.getIdDBFieldName())) {
 				definition.append(" PRIMARY KEY AUTOINCREMENT");
 			}else if(column!=null){
 				if (column.length() > -1) {
@@ -315,7 +314,7 @@ public final class SQLiteUtils {
 			if (FOREIGN_KEYS_SUPPORTED && ReflectionUtils.isModel(type)) {
 				definition.append(" REFERENCES ");
 				definition.append(Cache.getTableInfo((Class<? extends Model>) type).getTableName());
-				definition.append("("+tableInfo.getIdName()+")");
+				definition.append("("+tableInfo.getIdDBFieldName()+")");
 				definition.append(" ON DELETE ");
 				definition.append(column.onDelete().toString().replace("_", " "));
 				definition.append(" ON UPDATE ");
@@ -332,20 +331,22 @@ public final class SQLiteUtils {
 	@SuppressWarnings("unchecked")
 	public static <T extends Model> List<T> processCursor(Class<? extends Model> type, Cursor cursor) {
 		TableInfo tableInfo = Cache.getTableInfo(type);
-		String idName = tableInfo.getIdName();
+		String idName = tableInfo.getIdDBFieldName();
 		final List<T> entities = new ArrayList<T>();
+		/**
+		 * Obtain the columns ordered to fix issue #106 (https://github.com/pardom/ActiveAndroid/issues/106)
+		 * when the cursor have multiple columns with same name obtained from join tables.
+		 */
+		List<String> columnsOrdered = new ArrayList<String>(Arrays.asList(cursor.getColumnNames()));
+		int idColumnIndex = TableInfo.getColumnIndex(columnsOrdered, idName);
 
 		try {
 			Constructor<?> entityConstructor = type.getConstructor();
 
 			if (cursor.moveToFirst()) {
-                /**
-                 * Obtain the columns ordered to fix issue #106 (https://github.com/pardom/ActiveAndroid/issues/106)
-                 * when the cursor have multiple columns with same name obtained from join tables.
-                 */
-                List<String> columnsOrdered = new ArrayList<String>(Arrays.asList(cursor.getColumnNames()));
+
 				do {
-					int idColumnIndex = columnsOrdered.indexOf(idName);
+
 					Model entity = null;
 					if(idColumnIndex != -1) {
 						entity = Cache.getEntity(type, cursor.getLong(idColumnIndex));

@@ -38,9 +38,20 @@ public final class TableInfo {
 
 	private Class<? extends Model> mType;
 	private String mTableName;
-	private String mIdName = Table.DEFAULT_ID_NAME;
+	private String mIdDBFieldName = Table.DEFAULT_ID_NAME;
 
 	private Map<Field, String> mColumnNames = new LinkedHashMap<Field, String>();
+
+	public static int getColumnIndex(List<String> colmnNames, String name){
+	    int index = -1;
+	    for(int i = 0; i < colmnNames.size(); i++){
+	        if(colmnNames.get(i).compareToIgnoreCase(name)== 0){
+	            index = i;
+	            break;
+            }
+        }
+        return index;
+    }
 
 	//////////////////////////////////////////////////////////////////////////////////////
 	// CONSTRUCTORS
@@ -53,7 +64,7 @@ public final class TableInfo {
 
         if (tableAnnotation != null) {
 			mTableName = tableAnnotation.name();
-			mIdName = tableAnnotation.id();
+			mIdDBFieldName = tableAnnotation.id();
 		}
 		else {
 			mTableName = type.getSimpleName();
@@ -61,7 +72,7 @@ public final class TableInfo {
 
         // Manually add the id column since it is not declared like the other columns.
         Field idField = getIdField(type);
-        mColumnNames.put(idField, mIdName);
+        mColumnNames.put(idField, mIdDBFieldName);
 
         List<Field> fields = new LinkedList<Field>(ReflectionUtils.getDeclaredColumnFields(type));
         Collections.reverse(fields);
@@ -92,8 +103,8 @@ public final class TableInfo {
 		return mTableName;
 	}
 
-	public String getIdName() {
-		return mIdName;
+	public String getIdDBFieldName() {
+		return mIdDBFieldName;
 	}
 
 	public Collection<Field> getFields() {
@@ -108,11 +119,11 @@ public final class TableInfo {
     private Field getIdField(Class<?> type) {
         if (Model.class.isAssignableFrom(type)) {
             try {
-                if(mIdName ==  Table.DEFAULT_ID_NAME){
+                //if(mIdFieldName ==  Table.DEFAULT_ID_NAME){
                     return Model.class.getDeclaredField("mId");
-                }else {
-                    return type.getDeclaredField(mIdName);
-                }
+                //}else {
+                //    return type.getDeclaredField(mIdFieldName);
+                //}
             }
             catch (NoSuchFieldException e) {
                 Log.e("Impossible!", e.toString());
