@@ -1,6 +1,6 @@
 buildscript {
 	repositories {
-		jcenter()
+		mavenCentral()
         maven {
             url 'https://maven.google.com/'
             name 'Google'
@@ -9,14 +9,14 @@ buildscript {
         google()
 	}
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.0.0'
+        classpath 'com.android.tools.build:gradle:7.2.2'
     }
 
 }
 
 
 repositories{
-	jcenter()
+
 	maven {
 		url 'https://maven.google.com/'
 		name 'Google'
@@ -32,11 +32,11 @@ targetCompatibility = '1.6'
 sourceCompatibility = '1.6'
 android{
 	defaultConfig {
-		minSdkVersion 14
-		targetSdkVersion 30
+		minSdkVersion 19
+		targetSdkVersion 32
     }
 	compileSdkVersion rootProject.ext.compileSdkVersion
-	buildToolsVersion "30.0.2"
+
 
 	sourceSets {
 		main {
