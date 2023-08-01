@@ -22,6 +22,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,7 +37,7 @@ public class SqlParser {
     public static List<String> parse(final InputStream stream) throws IOException {
 
         final BufferedInputStream buffer = new BufferedInputStream(stream);
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
         final List<String> commands = new ArrayList<String>();
 
         final StringBuffer sb = new StringBuffer();

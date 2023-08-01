@@ -281,12 +281,12 @@ public final class SQLiteUtils {
 		else if (ReflectionUtils.isModel(type)) {
 			definition.append(name);
 			definition.append(" ");
-			definition.append(SQLiteType.INTEGER.toString());
+			definition.append(SQLiteType.INTEGER);
 		}
 		else if (ReflectionUtils.isSubclassOf(type, Enum.class)) {
 			definition.append(name);
 			definition.append(" ");
-			definition.append(SQLiteType.TEXT.toString());
+			definition.append(SQLiteType.TEXT);
 		}
 
 		if (!TextUtils.isEmpty(definition)) {

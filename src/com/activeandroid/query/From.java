@@ -29,9 +29,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class From implements Sqlable {
-	private Sqlable mQueryBase;
+	private final Sqlable mQueryBase;
 
-	private Class<? extends Model> mType;
+	private final Class<? extends Model> mType;
 	private String mAlias;
 	private List<Join> mJoins;
 	private final StringBuilder mWhere = new StringBuilder();
@@ -41,7 +41,7 @@ public final class From implements Sqlable {
 	private String mLimit;
 	private String mOffset;
 
-	private List<Object> mArguments;
+	private final List<Object> mArguments;
 
 	public From(Class<? extends Model> table, Sqlable queryBase) {
 		mType = table;
@@ -308,7 +308,7 @@ public final class From implements Sqlable {
 	public <T extends Model> T executeSingle() {
 		if (mQueryBase instanceof Select) {
 			limit(1);
-			return (T) SQLiteUtils.rawQuerySingle(mType, toSql(), getArguments());
+			return SQLiteUtils.rawQuerySingle(mType, toSql(), getArguments());
 			
 		} else {
 			limit(1);

@@ -36,11 +36,11 @@ public final class TableInfo {
 	// PRIVATE MEMBERS
 	//////////////////////////////////////////////////////////////////////////////////////
 
-	private Class<? extends Model> mType;
-	private String mTableName;
+	private final Class<? extends Model> mType;
+	private final String mTableName;
 	private String mIdDBFieldName = Table.DEFAULT_ID_NAME;
 
-	private Map<Field, String> mColumnNames = new LinkedHashMap<Field, String>();
+	private final Map<Field, String> mColumnNames = new LinkedHashMap<Field, String>();
 
 	public static int getColumnIndex(List<String> colmnNames, String name){
 	    int index = -1;

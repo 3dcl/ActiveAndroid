@@ -23,13 +23,13 @@ import java.util.Arrays;
 import java.util.List;
 
 public final class Set implements Sqlable {
-	private Update mUpdate;
+	private final Update mUpdate;
 
-	private String mSet;
+	private final String mSet;
 	private String mWhere;
 
-	private List<Object> mSetArguments;
-	private List<Object> mWhereArguments;
+	private final List<Object> mSetArguments;
+	private final List<Object> mWhereArguments;
 
 	public Set(Update queryBase, String set) {
 		mUpdate = queryBase;

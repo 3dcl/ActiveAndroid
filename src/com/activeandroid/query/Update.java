@@ -20,7 +20,7 @@ import com.activeandroid.Cache;
 import com.activeandroid.Model;
 
 public final class Update implements Sqlable {
-	private Class<? extends Model> mType;
+	private final Class<? extends Model> mType;
 
 	public Update(Class<? extends Model> table) {
 		mType = table;
@@ -40,11 +40,10 @@ public final class Update implements Sqlable {
 
 	@Override
 	public String toSql() {
-		StringBuilder sql = new StringBuilder();
-		sql.append("UPDATE ");
-		sql.append(Cache.getTableName(mType));
-		sql.append(" ");
+        String sql = "UPDATE " +
+                Cache.getTableName(mType) +
+                " ";
 
-		return sql.toString();
+		return sql;
 	}
 }

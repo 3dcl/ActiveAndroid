@@ -35,7 +35,7 @@ public class Configuration {
 	// PRIVATE MEMBERS
 	//////////////////////////////////////////////////////////////////////////////////////
 
-	private Context mContext;
+	private final Context mContext;
 	private String mDatabaseName;
 	private int mDatabaseVersion;
 	private String mSqlParser;
@@ -110,7 +110,7 @@ public class Configuration {
 		// PRIVATE MEMBERS
 		//////////////////////////////////////////////////////////////////////////////////////
 
-		private Context mContext;
+		private final Context mContext;
 
 		private Integer mCacheSize;
 		private String mDatabaseName;

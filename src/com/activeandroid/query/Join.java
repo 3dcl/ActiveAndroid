@@ -26,10 +26,10 @@ public final class Join implements Sqlable {
 		LEFT, OUTER, INNER, CROSS
 	}
 
-	private From mFrom;
-	private Class<? extends Model> mType;
+	private final From mFrom;
+	private final Class<? extends Model> mType;
 	private String mAlias;
-	private JoinType mJoinType;
+	private final JoinType mJoinType;
 	private String mOn;
 	private String[] mUsing;
 
@@ -65,7 +65,7 @@ public final class Join implements Sqlable {
 		StringBuilder sql = new StringBuilder();
 
 		if (mJoinType != null) {
-			sql.append(mJoinType.toString()).append(" ");
+			sql.append(mJoinType).append(" ");
 		}
 
 		sql.append("JOIN ");

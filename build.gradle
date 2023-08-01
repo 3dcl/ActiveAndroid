@@ -9,7 +9,7 @@ buildscript {
         google()
 	}
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.3.0'
+        classpath 'com.android.tools.build:gradle:8.0.2'
     }
 
 }
@@ -31,9 +31,10 @@ apply plugin: 'com.android.library'
 targetCompatibility = '1.6'
 sourceCompatibility = '1.6'
 android{
+	namespace 'com.activeandroid'
 	defaultConfig {
 		minSdkVersion 19
-		targetSdkVersion 32
+		targetSdkVersion 34
   }
 	compileSdkVersion rootProject.ext.compileSdkVersion
 

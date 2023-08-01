@@ -28,7 +28,7 @@ public class ContentProvider extends android.content.ContentProvider {
 	//////////////////////////////////////////////////////////////////////////////////////
 
 	private static String sAuthority;
-	private static SparseArray<String> sMimeTypeCache = new SparseArray<String>();
+	private static final SparseArray<String> sMimeTypeCache = new SparseArray<String>();
 
 	//////////////////////////////////////////////////////////////////////////////////////
 	// PUBLIC METHODS
@@ -155,7 +155,7 @@ public class ContentProvider extends android.content.ContentProvider {
 
 		if (id != null) {
 			uri.append("/");
-			uri.append(id.toString());
+			uri.append(id);
 		}
 
 		return Uri.parse(uri.toString());

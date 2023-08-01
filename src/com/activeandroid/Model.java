@@ -177,7 +177,7 @@ public abstract class Model {
 
 	public static <T extends Model> T load(Class<T> type, long id) {
 		TableInfo tableInfo = Cache.getTableInfo(type);
-		return (T) new Select().from(type).where(tableInfo.getIdDBFieldName()+"=?", id).executeSingle();
+		return new Select().from(type).where(tableInfo.getIdDBFieldName()+"=?", id).executeSingle();
 	}
 
 	// Model population
